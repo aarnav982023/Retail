@@ -9,6 +9,7 @@ import ListItemText from "@material-ui/core/ListItemText";
 import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
 import { SwipeableDrawer } from "@material-ui/core";
+import { Link } from "react-router-dom";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -30,9 +31,9 @@ const NavBar = () => {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const categories = [
     "Electronics",
-    "Tvs & Appliances",
+    "Appliances",
     "Fashion",
-    "Home & Furniture",
+    "Furniture",
     "Sports",
     "Books"
   ];
@@ -40,9 +41,11 @@ const NavBar = () => {
     <div className={classes.list}>
       <List>
         {categories.map(category => (
-          <ListItem button key={category}>
-            <ListItemText primary={category} />
-          </ListItem>
+          <Link to={`/${category.toLowerCase()}`} key={category}>
+            <ListItem button>
+              <ListItemText primary={category} />
+            </ListItem>
+          </Link>
         ))}
       </List>
     </div>
@@ -62,9 +65,11 @@ const NavBar = () => {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" className={classes.title}>
-            Retail
-          </Typography>
+          <Link to="/">
+            <Typography variant="h6" className={classes.title}>
+              Retail
+            </Typography>
+          </Link>
         </Toolbar>
       </AppBar>
       <SwipeableDrawer

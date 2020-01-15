@@ -3,6 +3,12 @@
     padding:0;
     box-sizing: border-box;
 }
+a{
+    text-decoration: inherit;
+    color:inherit;
+    background-color: inherit;
+    -webkit-tap-highlight-color: transparent;
+}
 .content{
     max-width: 1500px;
     margin:auto;
