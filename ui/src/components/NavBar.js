@@ -1,4 +1,5 @@
 import React from "react";
+import { connect } from "react-redux";
 import { makeStyles } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -26,21 +27,13 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const NavBar = () => {
+const NavBar = props => {
   const classes = useStyles();
   const [drawerOpen, setDrawerOpen] = React.useState(false);
-  const categories = [
-    "Electronics",
-    "Appliances",
-    "Fashion",
-    "Furniture",
-    "Sports",
-    "Books"
-  ];
   const drawer = (
     <div className={classes.list}>
       <List>
-        {categories.map(category => (
+        {props.sections.map(category => (
           <Link to={`/${category.toLowerCase()}`} key={category}>
             <ListItem button>
               <ListItemText primary={category} />
@@ -87,4 +80,8 @@ const NavBar = () => {
   );
 };
 
-export default NavBar;
+const mapStateToProps = state => {
+  return state;
+};
+
+export default connect(mapStateToProps)(NavBar);
