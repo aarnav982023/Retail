@@ -1,7 +1,7 @@
 import React from "react";
 
-const SectionPage = props => {
-  return <div>{props.section}</div>;
+const SectionPage = ({ match: { params } }) => {
+  return <div>{params.section}</div>;
 };
 
 export default SectionPage;
