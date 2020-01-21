@@ -12,7 +12,8 @@ import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
 import { SwipeableDrawer } from "@material-ui/core";
 import { Link } from "react-router-dom";
-import SignInDialog from "./SignInDialog";
+import Login from "./Login";
+import Registration from "./Registration";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -36,7 +37,8 @@ const useStyles = makeStyles(theme => ({
 const NavBar = props => {
   const classes = useStyles();
   const [drawerOpen, setDrawer] = React.useState(false);
-  const [signInDialog, setSignInDialog] = React.useState(false);
+  const [login, setlogin] = React.useState(false);
+  const [registration, setRegistration] = React.useState(false);
   const drawer = (
     <div className={classes.list}>
       <List>
@@ -68,7 +70,7 @@ const NavBar = props => {
           <Typography variant="h6" className={classes.title}>
             <Link to="/">Retail</Link>
           </Typography>
-          <Button color="inherit" onClick={() => setSignInDialog(true)}>
+          <Button color="inherit" onClick={() => setlogin(true)}>
             Sign in
           </Button>
         </Toolbar>
@@ -84,10 +86,20 @@ const NavBar = props => {
       >
         {drawer}
       </SwipeableDrawer>
-      <SignInDialog
-        open={signInDialog}
+      <Login
+        open={login}
         handleClose={() => {
-          setSignInDialog(false);
+          setlogin(false);
+        }}
+        startRegistration={() => {
+          setlogin(false);
+          setRegistration(true);
+        }}
+      />
+      <Registration
+        open={registration}
+        handleClose={() => {
+          setRegistration(false);
         }}
       />
     </div>
