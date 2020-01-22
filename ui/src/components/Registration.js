@@ -15,6 +15,9 @@ import Button from "@material-ui/core/Button";
 import Check from "@material-ui/icons/Check";
 import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
+import PersonalDetailsForm from "../forms/PersonalDetailsForm";
+import ContactDetailsForm from "../forms/ContactDetailsForm";
+import ExtraDetailsForm from "../forms/ExtraDetailsForm";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -38,23 +41,14 @@ const useStyles = makeStyles(theme => ({
     marginTop: theme.spacing(1),
     marginBottom: theme.spacing(1),
     alignSelf: "center"
+  },
+  textField: {
+    marginBottom: theme.spacing(2),
+    width: "100%"
   }
 }));
 
 const getSteps = () => ["Personal Details", "Contact Details", "Extra Details"];
-
-const getStepContent = step => {
-  switch (step) {
-    case 0:
-      return "Personal Details Content";
-    case 1:
-      return "Contact Details Content";
-    case 2:
-      return "Extra Details Content";
-    default:
-      return "Unknown Step";
-  }
-};
 
 const Registration = props => {
   const classes = useStyles();
@@ -63,6 +57,25 @@ const Registration = props => {
   const steps = getSteps();
 
   const matches = useMediaQuery("(max-width:600px)");
+
+  const [values, setValues] = React.useState({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: ""
+  });
+
+  const [errors, setErrors] = React.useState({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: ""
+  });
+
+  const [visibility, setVisibility] = React.useState({
+    password: false,
+    confirmPassword: false
+  });
 
   const handleNext = () => {
     setActiveStep(prevActiveStep => prevActiveStep + 1);
@@ -74,6 +87,28 @@ const Registration = props => {
 
   const handleFinish = () => {
     handleClose();
+  };
+
+  const getStepContent = step => {
+    switch (step) {
+      case 0:
+        return (
+          <PersonalDetailsForm
+            values={values}
+            errors={errors}
+            visibility={visibility}
+            setValues={setValues}
+            setErrors={setErrors}
+            setVisibility={setVisibility}
+          />
+        );
+      case 1:
+        return <ContactDetailsForm />;
+      case 2:
+        return <ExtraDetailsForm />;
+      default:
+        return "Unknown Step";
+    }
   };
 
   const useQontoStepIconStyles = makeStyles(theme => ({
@@ -184,9 +219,7 @@ const Registration = props => {
       <Paper square elevation={0} className={classes.header}>
         <Typography>{steps[activeStep]}</Typography>
       </Paper>
-      <Typography className={classes.mobileInstructions}>
-        {getStepContent(activeStep)}
-      </Typography>
+      <DialogContent>{getStepContent(activeStep)}</DialogContent>
       <MobileStepper
         steps={steps.length}
         position="static"
