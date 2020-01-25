@@ -20,12 +20,33 @@ router.post(
             .isEmail()
             .normalizeEmail(),
         check(
-            'password1',
+            'password',
             'Password must be at least 8 characters long.'
         ).isLength({ min: 8 }),
-        check('password2', 'Passwords do not match.').custom(
-            (value, { req }) => value === req.body.password1
-        )
+        check('field1', 'Address Field 1 is required')
+            .not()
+            .isEmpty(),
+        check('pincode')
+            .not()
+            .isEmpty()
+            .withMessage('Pincode is required')
+            .isPostalCode()
+            .withMessage('Enter a valid Postal Code'),
+        check('city', 'City is required')
+            .not()
+            .isEmpty(),
+        check('state', 'State is required')
+            .not()
+            .isEmpty(),
+        check('country', 'Country is required')
+            .not()
+            .isEmpty(),
+        check('phone')
+            .not()
+            .isEmpty()
+            .withMessage('Phone number is compulsory')
+            .isMobilePhone()
+            .withMessage('Enter a valid Phone number')
     ],
     async (req, res) => {
         const errors = validationResult(req);
