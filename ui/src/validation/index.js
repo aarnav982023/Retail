@@ -23,3 +23,8 @@ export const validateConfirmPassword = (password, confirmPassword) => {
   if (confirmPassword !== password)
     return "Please make sure your passwords match";
 };
+
+export const validatePincode = pincode => {
+  const regex = /^[1-9][0-9]{5}$/;
+  return regex.test(pincode) ? "" : "Please enter a valid pincode";
+};

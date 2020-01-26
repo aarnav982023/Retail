@@ -62,14 +62,22 @@ const Registration = props => {
     username: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    pincode: "",
+    city: "",
+    state: "",
+    country: "",
+    streetAddress: "",
+    streetAddress2: "",
+    phoneNumber: ""
   });
 
   const [errors, setErrors] = React.useState({
     username: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    pincode: ""
   });
 
   const [visibility, setVisibility] = React.useState({
@@ -103,7 +111,14 @@ const Registration = props => {
           />
         );
       case 1:
-        return <ContactDetailsForm />;
+        return (
+          <ContactDetailsForm
+            values={values}
+            errors={errors}
+            setValues={setValues}
+            setErrors={setErrors}
+          />
+        );
       case 2:
         return <ExtraDetailsForm />;
       default:
