@@ -194,9 +194,7 @@ const Registration = props => {
             );
           })}
         </Stepper>
-        <Typography className={classes.instructions}>
-          {getStepContent(activeStep)}
-        </Typography>
+        {getStepContent(activeStep)}
         <Button disabled={activeStep === 0} onClick={handleBack}>
           Back
         </Button>

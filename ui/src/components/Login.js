@@ -9,7 +9,8 @@ import Visibility from "@material-ui/icons/Visibility";
 import VisibilityOff from "@material-ui/icons/VisibilityOff";
 import { makeStyles } from "@material-ui/core/styles";
 import InputAdornment from "@material-ui/core/InputAdornment";
-import { validateEmail, validatePassword } from "../validation";
+import { validateEmail } from "../validation";
+import RetailApi from "../apis/RetailApi";
 
 const styles = makeStyles(theme => ({
   textField: {
@@ -44,10 +45,24 @@ const Login = props => {
   };
   const handlePasswordChange = event => {
     setValues({ ...values, password: event.target.value });
-    setErrors({ ...errors, password: validatePassword(event.target.value) });
   };
 
   const { open, handleClose, startRegistration } = props;
+
+  const login = async event => {
+    console.log("in login");
+    event.preventDefault();
+    /*const response = await RetailApi.post("/api/users/login", {
+      email: values.email,
+      password: values.password
+    });*/
+    try {
+      const response = await RetailApi.get();
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <Dialog
@@ -59,7 +74,7 @@ const Login = props => {
     >
       <DialogTitle id="form-dialog-login">Log In</DialogTitle>
       <DialogContent>
-        <form>
+        <form onSubmit={login}>
           <TextField
             className={classes.textField}
             label="Email"
@@ -94,7 +109,9 @@ const Login = props => {
               )
             }}
           />
-          <Button color="primary">Login</Button>
+          <Button type="submit" color="primary">
+            Login
+          </Button>
           <Button type="button" color="primary" onClick={startRegistration}>
             Register
           </Button>
