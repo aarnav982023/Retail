@@ -5,7 +5,7 @@
     "main": "index.js",
     "scripts": {
         "start": "node server",
-        "server": "nodemon server"
+        "server": "env-cmd -f ./config/dev.env nodemon server"
     },
     "repository": {
         "type": "git",
@@ -21,15 +21,16 @@
     },
     "homepage": "https://github.com/aarnav982023/Retail#readme",
     "dependencies": {
+        "@sendgrid/mail": "^6.5.1",
         "bcryptjs": "^2.4.3",
-        "config": "^3.2.4",
         "express": "^4.17.1",
-        "express-validator": "^6.2.0",
-        "mongodb": "^3.5.1",
-        "mongoose": "^5.7.9"
+        "jsonwebtoken": "^8.4.0",
+        "mongoose": "^5.3.16",
+        "multer": "^1.4.1",
+        "validator": "^10.9.0"
     },
     "devDependencies": {
-        "concurrently": "^5.0.0",
+        "env-cmd": "^10.0.1",
         "nodemon": "^1.19.4"
     }
 }
