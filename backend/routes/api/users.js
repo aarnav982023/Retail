@@ -1,91 +1,181 @@
-// Handles registering users api
 const express = require('express');
-const router = express.Router();
-const { check, validationResult } = require('express-validator');
+const multer = require('multer');
+//const sharp = require('sharp')
 const User = require('../../models/User');
-const bcrypt = require('bcryptjs');
+const auth = require('../../middleware/auth');
+const {
+    sendWelcomeEmail,
+    sendCancelationEmail
+} = require('../../emails/account');
+const router = new express.Router();
 
 // @route POST api/users
 // @desc Register User
 // @access Public
-router.post(
-    '/',
-    [
-        check('name', 'Name is required')
-            .not()
-            .isEmpty(),
-        check('email', 'Please enter a valid email address.')
-            .not()
-            .isEmpty()
-            .isEmail()
-            .normalizeEmail(),
-        check(
-            'password',
-            'Password must be at least 8 characters long.'
-        ).isLength({ min: 8 }),
-        check('field1', 'Address Field 1 is required')
-            .not()
-            .isEmpty(),
-        check('pincode')
-            .not()
-            .isEmpty()
-            .withMessage('Pincode is required')
-            .isPostalCode()
-            .withMessage('Enter a valid Postal Code'),
-        check('city', 'City is required')
-            .not()
-            .isEmpty(),
-        check('state', 'State is required')
-            .not()
-            .isEmpty(),
-        check('country', 'Country is required')
-            .not()
-            .isEmpty(),
-        check('phone')
-            .not()
-            .isEmpty()
-            .withMessage('Phone number is compulsory')
-            .isMobilePhone()
-            .withMessage('Enter a valid Phone number')
-    ],
-    async (req, res) => {
-        const errors = validationResult(req);
+router.post('/', async (req, res) => {
+    const user = new User(req.body);
 
-        if (!errors.isEmpty()) {
-            return res.status(422).json({ errors: errors.array() });
-        }
-
-        const { name, email, password1, password2 } = req.body;
-
-        try {
-            // Check if user already exists
-            let user = await User.findOne({ email });
-
-            if (user) {
-                return res
-                    .status(400)
-                    .json({ errors: [{ msg: 'User already exists' }] });
-            }
-
-            // Creating the user using model
-            user = new User({
-                name,
-                email,
-                password: password1
-            });
-
-            // Encrypt password
-            const salt = await bcrypt.genSalt(10);
-            user.password = await bcrypt.hash(password1, salt);
-
-            // Save the user to database
-            await user.save();
-            res.json({ msg: 'User Registered' });
-        } catch (ex) {
-            console.log(ex.message);
-            res.status(500).send('Server Error');
-        }
+    try {
+        await user.save();
+        sendWelcomeEmail(user.email, user.name);
+        const token = await user.generateAuthToken();
+        res.status(201).send({ user, token });
+    } catch (e) {
+        res.status(400).send(e);
     }
-);
+});
+
+// @route POST api/users/login
+// @desc Login an existing user
+// @access Public
+router.post('/login', async (req, res) => {
+    try {
+        const user = await User.findByCredentials(
+            req.body.email,
+            req.body.password
+        );
+        const token = await user.generateAuthToken();
+        res.send({ user, token });
+    } catch (e) {
+        res.status(400).send();
+    }
+});
+
+// @route POST api/users/logout
+// @desc Logout authenticated user
+// @access Private
+router.post('/logout', auth, async (req, res) => {
+    try {
+        req.user.tokens = req.user.tokens.filter(token => {
+            return token.token !== req.token;
+        });
+        await req.user.save();
+
+        res.send();
+    } catch (e) {
+        res.status(500).send();
+    }
+});
+
+// @route POST api/users/logoutAll
+// @desc Logout authenticated user from all devices
+// @access Private
+router.post('/logoutAll', auth, async (req, res) => {
+    try {
+        req.user.tokens = [];
+        await req.user.save();
+        res.send();
+    } catch (e) {
+        res.status(500).send();
+    }
+});
+
+// @route GET api/users/me
+// @desc Current user details
+// @access Private
+router.get('/me', auth, async (req, res) => {
+    res.send(req.user);
+});
+
+// @route PATCH api/users/me
+// @desc Update current user details
+// @access Private
+router.patch('/me', auth, async (req, res) => {
+    const updates = Object.keys(req.body);
+    const allowedUpdates = [
+        'personal.name',
+        'personal.email',
+        'contact.address.field1',
+        'contact.address.field2',
+        'contact.address.pincode',
+        'contact.address.city',
+        'contact.address.state',
+        'contact.address.country',
+        'contact.phone',
+        'extra.card.number',
+        'extra.card.expiry',
+        'extra.card.name'
+    ];
+    const isValidOperation = updates.every(update =>
+        allowedUpdates.includes(update)
+    );
+
+    if (!isValidOperation) {
+        return res.status(400).send({ error: 'Invalid updates!' });
+    }
+
+    try {
+        updates.forEach(update => (req.user[update] = req.body[update]));
+        await req.user.save();
+        res.send(req.user);
+    } catch (e) {
+        res.status(400).send(e);
+    }
+});
+
+// @route DELETE api/users/me
+// @desc Delete current user
+// @access Private
+router.delete('/me', auth, async (req, res) => {
+    try {
+        await req.user.remove();
+        sendCancelationEmail(req.user.email, req.user.name);
+        res.send(req.user);
+    } catch (e) {
+        res.status(500).send();
+    }
+});
+
+// const upload = multer({
+//     limits: {
+//         fileSize: 1000000
+//     },
+//     fileFilter(req, file, cb) {
+//         if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+//             return cb(new Error('Please upload an image'));
+//         }
+
+//         cb(undefined, true);
+//     }
+// });
+
+// @route POST api/users/me/avatar
+// @desc Add avatar for current user
+// @access Private
+// router.post('/me/avatar', auth, upload.single('avatar'), async (req, res) => {
+//     const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
+//     req.user.avatar = buffer
+//     await req.user.save()
+//     res.send()
+// }, (error, req, res, next) => {
+//     res.status(400).send({ error: error.message })
+// })
+
+// @route DELETE api/users/me/avatar
+// @desc Delete avatar of current user
+// @access Private
+// router.delete('/me/avatar', auth, async (req, res) => {
+//     req.user.avatar = undefined;
+//     await req.user.save();
+//     res.send();
+// });
+
+// @route GET api/users/:id/avatar
+// @desc Register User
+// @access Public
+// router.get('/:id/avatar', async (req, res) => {
+//     try {
+//         const user = await User.findById(req.params.id);
+
+//         if (!user || !user.avatar) {
+//             throw new Error();
+//         }
+
+//         res.set('Content-Type', 'image/png');
+//         res.send(user.avatar);
+//     } catch (e) {
+//         res.status(404).send();
+//     }
+// });
 
 module.exports = router;

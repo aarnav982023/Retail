@@ -5,7 +5,7 @@
     "main": "index.js",
     "scripts": {
         "start": "node server",
-        "server": "env-cmd ./config/dev.env nodemon server"
+        "server": "env-cmd -f ./config/dev.env nodemon server"
     },
     "repository": {
         "type": "git",
