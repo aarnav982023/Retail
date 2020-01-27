@@ -69,15 +69,21 @@ const Registration = props => {
     country: "",
     streetAddress: "",
     streetAddress2: "",
-    phoneNumber: ""
+    phoneNumber: "",
+    expiryDate: new Date(),
+    card: "",
+    nameOnCard: "",
+    file: null
   });
 
   const [errors, setErrors] = React.useState({
     username: "",
     email: "",
     password: "",
+    phoneNumber: "",
     confirmPassword: "",
-    pincode: ""
+    pincode: "",
+    card: ""
   });
 
   const [visibility, setVisibility] = React.useState({
@@ -120,7 +126,14 @@ const Registration = props => {
           />
         );
       case 2:
-        return <ExtraDetailsForm />;
+        return (
+          <ExtraDetailsForm
+            values={values}
+            errors={errors}
+            setValues={setValues}
+            setErrors={setErrors}
+          />
+        );
       default:
         return "Unknown Step";
     }

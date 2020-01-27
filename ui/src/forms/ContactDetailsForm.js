@@ -1,7 +1,7 @@
 import React from "react";
 import TextField from "@material-ui/core/TextField";
 import { makeStyles } from "@material-ui/core/styles";
-import { validatePincode } from "../validation";
+import { validatePincode, validatPhoneNumber } from "../validation";
 import PostalApi from "../apis/PostalApi";
 
 const useStyles = makeStyles(theme => ({
@@ -44,8 +44,7 @@ const ContactDetailsForm = props => {
 
   const setCityStateCountry = async pincode => {
     const response = await PostalApi.get(pincode);
-    console.log(response.data[0].PostOffice[0]);
-    if (!response.data[0].PostOffice) {
+    if (!response.data || !response.data[0].PostOffice) {
       setErrors({ ...errors, pincode: "Please enter a valid pincode" });
       return;
     }
@@ -70,6 +69,10 @@ const ContactDetailsForm = props => {
 
   const handlePhoneNumberChange = event => {
     setValues({ ...values, phoneNumber: event.target.value });
+    setErrors({
+      ...errors,
+      phoneNumber: validatPhoneNumber(event.target.value)
+    });
   };
   const classes = useStyles();
 
@@ -129,6 +132,8 @@ const ContactDetailsForm = props => {
         label="Phone Number"
         variant="outlined"
         value={values.phoneNumber}
+        helperText={errors.phoneNumber}
+        error={errors.phoneNumber ? true : false}
         onChange={handlePhoneNumberChange}
       />
     </form>
