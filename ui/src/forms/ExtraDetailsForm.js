@@ -62,7 +62,7 @@ const ExtraDetailsForm = props => {
 
   return (
     <form>
-      <Dropzone handleFileUpload={handleFileUpload} />
+      <Dropzone file={props.values.file} handleFileUpload={handleFileUpload} />
       <div style={{ display: "inline-flex", width: "100%" }}>
         <TextField
           className={classes.name}

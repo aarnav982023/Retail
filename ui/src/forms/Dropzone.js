@@ -46,7 +46,9 @@ const Dropzone = props => {
   } = useDropzone({
     accept: "image/*",
     multiple: false,
-    onDropAccepted: file => props.handleFileUpload(file)
+    onDropAccepted: files => {
+      props.handleFileUpload(files[0]);
+    }
   });
   return (
     <Container
@@ -58,7 +60,9 @@ const Dropzone = props => {
       })}
     >
       <input {...getInputProps()} />
-      <Typography variant="body1">Upload Image</Typography>
+      <Typography variant="body1">
+        {props.file ? `Uploaded ${props.file.name}` : "Upload Image"}
+      </Typography>
     </Container>
   );
 };

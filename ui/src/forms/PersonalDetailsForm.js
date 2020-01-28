@@ -8,7 +8,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import {
   validateEmail,
   validatePassword,
-  validateConfirmPassword
+  validateConfirmPassword,
+  validateUsername
 } from "../validation";
 
 const useStyles = makeStyles(theme => ({
@@ -32,6 +33,7 @@ const PersonalDetailsForm = props => {
 
   const handleUsernameChange = event => {
     setValues({ ...values, username: event.target.value });
+    setErrors({ ...errors, username: validateUsername(event.target.value) });
   };
 
   const handleEmailChange = event => {
@@ -70,6 +72,8 @@ const PersonalDetailsForm = props => {
         variant="outlined"
         value={values.username}
         onChange={handleUsernameChange}
+        error={errors.username ? true : false}
+        helperText={errors.username}
       />
       <TextField
         className={classes.textField}

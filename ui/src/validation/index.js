@@ -1,3 +1,7 @@
+export const validateUsername = username => {
+  return username.length ? "" : "Please enter a valid Username";
+};
+
 export const validateEmail = email => {
   const regex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return regex.test(email) ? "" : "Please enter a valid email";
@@ -24,12 +28,16 @@ export const validateConfirmPassword = (password, confirmPassword) => {
     return "Please make sure your passwords match";
 };
 
+export const validateStreetAddress = streetAddress => {
+  return streetAddress.length ? "" : "Please enter a valid Street Address";
+};
+
 export const validatePincode = pincode => {
   const regex = /^[1-9][0-9]{5}$/;
   return regex.test(pincode) ? "" : "Please enter a valid pincode";
 };
 
-export const validatPhoneNumber = phoneNumber => {
+export const validatePhoneNumber = phoneNumber => {
   const regex = /^(\+\d{1,3}[- ]?)?\d{10}$/;
   return regex.test(phoneNumber) ? "" : "Please enter a valid phone Number";
 };

@@ -18,6 +18,15 @@ import Typography from "@material-ui/core/Typography";
 import PersonalDetailsForm from "../forms/PersonalDetailsForm";
 import ContactDetailsForm from "../forms/ContactDetailsForm";
 import ExtraDetailsForm from "../forms/ExtraDetailsForm";
+import {
+  validateEmail,
+  validatePassword,
+  validateConfirmPassword,
+  validateUsername,
+  validateStreetAddress,
+  validatePincode,
+  validatePhoneNumber
+} from "../validation";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -83,6 +92,7 @@ const Registration = props => {
     phoneNumber: "",
     confirmPassword: "",
     pincode: "",
+    streetAddress: "",
     card: ""
   });
 
@@ -91,7 +101,48 @@ const Registration = props => {
     confirmPassword: false
   });
 
+  const validateByActiveStep = () => {
+    switch (activeStep) {
+      case 0: {
+        const username = validateUsername(values.username);
+        const email = validateEmail(values.email);
+        const password = validatePassword(values.password);
+        const confirmPassword = validateConfirmPassword(
+          values.password,
+          values.confirmPassword
+        );
+        console.log(confirmPassword);
+        setErrors({
+          ...errors,
+          username,
+          email,
+          password,
+          confirmPassword
+        });
+        return email || password || confirmPassword ? false : true;
+      }
+      case 1: {
+        const streetAddress = validateStreetAddress(values.streetAddress);
+        const pincode = errors.pincode.length
+          ? errors.pincode
+          : validatePincode(values.pincode);
+        const phoneNumber = validatePhoneNumber(values.phoneNumber);
+        setErrors({
+          ...errors,
+          streetAddress,
+          pincode,
+          phoneNumber
+        });
+        return streetAddress || pincode || phoneNumber ? false : true;
+      }
+      default: {
+        break;
+      }
+    }
+  };
+
   const handleNext = () => {
+    if (!validateByActiveStep()) return;
     setActiveStep(prevActiveStep => prevActiveStep + 1);
   };
 

@@ -1,7 +1,11 @@
 import React from "react";
 import TextField from "@material-ui/core/TextField";
 import { makeStyles } from "@material-ui/core/styles";
-import { validatePincode, validatPhoneNumber } from "../validation";
+import {
+  validatePincode,
+  validatePhoneNumber,
+  validateStreetAddress
+} from "../validation";
 import PostalApi from "../apis/PostalApi";
 
 const useStyles = makeStyles(theme => ({
@@ -61,6 +65,10 @@ const ContactDetailsForm = props => {
 
   const handleStreetAddressChange = event => {
     setValues({ ...values, streetAddress: event.target.value });
+    setErrors({
+      ...errors,
+      streetAddress: validateStreetAddress(event.target.value)
+    });
   };
 
   const handleStreetAddress2Change = event => {
@@ -71,7 +79,7 @@ const ContactDetailsForm = props => {
     setValues({ ...values, phoneNumber: event.target.value });
     setErrors({
       ...errors,
-      phoneNumber: validatPhoneNumber(event.target.value)
+      phoneNumber: validatePhoneNumber(event.target.value)
     });
   };
   const classes = useStyles();
@@ -84,6 +92,8 @@ const ContactDetailsForm = props => {
         variant="outlined"
         value={values.streetAddress}
         onChange={handleStreetAddressChange}
+        helperText={errors.streetAddress}
+        error={errors.streetAddress ? true : false}
       />
       <TextField
         className={classes.textField}
