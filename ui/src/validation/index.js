@@ -32,9 +32,9 @@ export const validateStreetAddress = streetAddress => {
   return streetAddress.length ? "" : "Please enter a valid Street Address";
 };
 
-export const validatePincode = pincode => {
-  const regex = /^[1-9][0-9]{5}$/;
-  return regex.test(pincode) ? "" : "Please enter a valid pincode";
+export const validatePincode = (pincode, error) => {
+  if (pincode.length) return error;
+  return "Please enter a valid pincode";
 };
 
 export const validatePhoneNumber = phoneNumber => {

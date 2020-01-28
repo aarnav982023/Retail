@@ -111,7 +111,6 @@ const Registration = props => {
           values.password,
           values.confirmPassword
         );
-        console.log(confirmPassword);
         setErrors({
           ...errors,
           username,
@@ -123,9 +122,7 @@ const Registration = props => {
       }
       case 1: {
         const streetAddress = validateStreetAddress(values.streetAddress);
-        const pincode = errors.pincode.length
-          ? errors.pincode
-          : validatePincode(values.pincode);
+        const pincode = validatePincode(values.pincode, errors.pincode);
         const phoneNumber = validatePhoneNumber(values.phoneNumber);
         setErrors({
           ...errors,
