@@ -18,6 +18,15 @@ import Typography from "@material-ui/core/Typography";
 import PersonalDetailsForm from "../forms/PersonalDetailsForm";
 import ContactDetailsForm from "../forms/ContactDetailsForm";
 import ExtraDetailsForm from "../forms/ExtraDetailsForm";
+import {
+  validateEmail,
+  validatePassword,
+  validateConfirmPassword,
+  validateUsername,
+  validateStreetAddress,
+  validatePincode,
+  validatePhoneNumber
+} from "../validation";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -62,14 +71,29 @@ const Registration = props => {
     username: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    pincode: "",
+    city: "",
+    state: "",
+    country: "",
+    streetAddress: "",
+    streetAddress2: "",
+    phoneNumber: "",
+    expiryDate: new Date(),
+    card: "",
+    nameOnCard: "",
+    file: null
   });
 
   const [errors, setErrors] = React.useState({
     username: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    phoneNumber: "",
+    confirmPassword: "",
+    pincode: "",
+    streetAddress: "",
+    card: ""
   });
 
   const [visibility, setVisibility] = React.useState({
@@ -77,7 +101,45 @@ const Registration = props => {
     confirmPassword: false
   });
 
+  const validateByActiveStep = () => {
+    switch (activeStep) {
+      case 0: {
+        const username = validateUsername(values.username);
+        const email = validateEmail(values.email);
+        const password = validatePassword(values.password);
+        const confirmPassword = validateConfirmPassword(
+          values.password,
+          values.confirmPassword
+        );
+        setErrors({
+          ...errors,
+          username,
+          email,
+          password,
+          confirmPassword
+        });
+        return email || password || confirmPassword ? false : true;
+      }
+      case 1: {
+        const streetAddress = validateStreetAddress(values.streetAddress);
+        const pincode = validatePincode(values.pincode, errors.pincode);
+        const phoneNumber = validatePhoneNumber(values.phoneNumber);
+        setErrors({
+          ...errors,
+          streetAddress,
+          pincode,
+          phoneNumber
+        });
+        return streetAddress || pincode || phoneNumber ? false : true;
+      }
+      default: {
+        break;
+      }
+    }
+  };
+
   const handleNext = () => {
+    if (!validateByActiveStep()) return;
     setActiveStep(prevActiveStep => prevActiveStep + 1);
   };
 
@@ -103,9 +165,23 @@ const Registration = props => {
           />
         );
       case 1:
-        return <ContactDetailsForm />;
+        return (
+          <ContactDetailsForm
+            values={values}
+            errors={errors}
+            setValues={setValues}
+            setErrors={setErrors}
+          />
+        );
       case 2:
-        return <ExtraDetailsForm />;
+        return (
+          <ExtraDetailsForm
+            values={values}
+            errors={errors}
+            setValues={setValues}
+            setErrors={setErrors}
+          />
+        );
       default:
         return "Unknown Step";
     }

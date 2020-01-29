@@ -52,16 +52,11 @@ const Login = props => {
   const login = async event => {
     console.log("in login");
     event.preventDefault();
-    /*const response = await RetailApi.post("/api/users/login", {
+    const response = await RetailApi.post("/users/login", {
       email: values.email,
       password: values.password
-    });*/
-    try {
-      const response = await RetailApi.get();
-      console.log(response);
-    } catch (error) {
-      console.log(error);
-    }
+    });
+    console.log(response);
   };
 
   return (
