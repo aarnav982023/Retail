@@ -95,16 +95,13 @@ const UserSchema = new mongoose.Schema({
         },
         card: {
             number: {
-                type: String,
-                required: true
+                type: String
             },
             expiry: {
-                type: String,
-                required: true
+                type: String
             },
             name: {
-                type: String,
-                required: true
+                type: String
             }
         }
     },
@@ -128,7 +125,6 @@ UserSchema.methods.toJSON = function() {
 
     delete userObject.personal.password;
     delete userObject.tokens;
-    delete userObject.extra;
 
     return userObject;
 };
