@@ -1,6 +1,5 @@
 const express = require('express');
 const multer = require('multer');
-//const sharp = require('sharp')
 const User = require('../../models/User');
 const auth = require('../../middleware/auth');
 const {
@@ -8,12 +7,56 @@ const {
     sendCancelationEmail
 } = require('../../emails/account');
 const router = new express.Router();
+const crypto = require('crypto');
+const path = require('path');
 
-// @route POST api/users
-// @desc Register User
-// @access Public
-router.post('/', async (req, res) => {
-    const user = new User(req.body);
+let avatarURL = '';
+
+async function randomToken() {
+    const buffer = await new Promise((resolve, reject) => {
+        crypto.randomBytes(50, function(ex, buffer) {
+            if (ex) {
+                reject('error generating token');
+            }
+            resolve(buffer);
+        });
+    });
+    const token = crypto
+        .createHash('sha1')
+        .update(buffer)
+        .digest('hex');
+    return token;
+}
+
+var storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null, path.join(__dirname, '../../public/profile-images'));
+    },
+    filename: async function(req, file, cb) {
+        const fileName =
+            (await randomToken()) +
+            '-' +
+            Date.now() +
+            path.extname(file.originalname);
+
+        avatarURL = process.env.BASE_URL + '/public/profile-images/' + fileName;
+        cb(null, fileName);
+    }
+});
+
+var upload = multer({ storage: storage });
+
+afterUpload = async (req, res, next) => {
+    const user = new User({
+        personal: req.body.personal,
+        contact: req.body.contact,
+        extra: {
+            card: req.body.extra.card
+        }
+    });
+    if (req.file) {
+        user.extra.avatar = avatarURL;
+    }
 
     try {
         await user.save();
@@ -23,7 +66,18 @@ router.post('/', async (req, res) => {
     } catch (e) {
         res.status(400).send(e);
     }
-});
+};
+
+afterUploadUpdate = async (req, res, next) => {
+    if (req.file) {
+        req.user.extra.avatar = avatarURL;
+    }
+};
+
+// @route POST api/users
+// @desc Register User
+// @access Public
+router.post('/', upload.single('avatar'), afterUpload, async (req, res) => {});
 
 // @route POST api/users/login
 // @desc Login an existing user
@@ -80,38 +134,44 @@ router.get('/me', auth, async (req, res) => {
 // @route PATCH api/users/me
 // @desc Update current user details
 // @access Private
-router.patch('/me', auth, async (req, res) => {
-    const updates = Object.keys(req.body);
-    const allowedUpdates = [
-        'personal.name',
-        'personal.email',
-        'contact.address.field1',
-        'contact.address.field2',
-        'contact.address.pincode',
-        'contact.address.city',
-        'contact.address.state',
-        'contact.address.country',
-        'contact.phone',
-        'extra.card.number',
-        'extra.card.expiry',
-        'extra.card.name'
-    ];
-    const isValidOperation = updates.every(update =>
-        allowedUpdates.includes(update)
-    );
+router.patch(
+    '/me',
+    auth,
+    upload.single('avatar'),
+    afterUpload,
+    async (req, res) => {
+        const updates = Object.keys(req.body);
+        const allowedUpdates = [
+            'personal.name',
+            'personal.email',
+            'contact.address.field1',
+            'contact.address.field2',
+            'contact.address.pincode',
+            'contact.address.city',
+            'contact.address.state',
+            'contact.address.country',
+            'contact.phone',
+            'extra.card.number',
+            'extra.card.expiry',
+            'extra.card.name'
+        ];
+        const isValidOperation = updates.every(update =>
+            allowedUpdates.includes(update)
+        );
 
-    if (!isValidOperation) {
-        return res.status(400).send({ error: 'Invalid updates!' });
-    }
+        if (!isValidOperation) {
+            return res.status(400).send({ error: 'Invalid updates!' });
+        }
 
-    try {
-        updates.forEach(update => (req.user[update] = req.body[update]));
-        await req.user.save();
-        res.send(req.user);
-    } catch (e) {
-        res.status(400).send(e);
+        try {
+            updates.forEach(update => (req.user[update] = req.body[update]));
+            await req.user.save();
+            res.send(req.user);
+        } catch (e) {
+            res.status(400).send(e);
+        }
     }
-});
+);
 
 // @route DELETE api/users/me
 // @desc Delete current user
@@ -126,31 +186,6 @@ router.delete('/me', auth, async (req, res) => {
     }
 });
 
-// const upload = multer({
-//     limits: {
-//         fileSize: 1000000
-//     },
-//     fileFilter(req, file, cb) {
-//         if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
-//             return cb(new Error('Please upload an image'));
-//         }
-
-//         cb(undefined, true);
-//     }
-// });
-
-// @route POST api/users/me/avatar
-// @desc Add avatar for current user
-// @access Private
-// router.post('/me/avatar', auth, upload.single('avatar'), async (req, res) => {
-//     const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
-//     req.user.avatar = buffer
-//     await req.user.save()
-//     res.send()
-// }, (error, req, res, next) => {
-//     res.status(400).send({ error: error.message })
-// })
-
 // @route DELETE api/users/me/avatar
 // @desc Delete avatar of current user
 // @access Private
@@ -158,24 +193,6 @@ router.delete('/me', auth, async (req, res) => {
 //     req.user.avatar = undefined;
 //     await req.user.save();
 //     res.send();
-// });
-
-// @route GET api/users/:id/avatar
-// @desc Register User
-// @access Public
-// router.get('/:id/avatar', async (req, res) => {
-//     try {
-//         const user = await User.findById(req.params.id);
-
-//         if (!user || !user.avatar) {
-//             throw new Error();
-//         }
-
-//         res.set('Content-Type', 'image/png');
-//         res.send(user.avatar);
-//     } catch (e) {
-//         res.status(404).send();
-//     }
 // });
 
 module.exports = router;
