@@ -18,6 +18,8 @@ import Typography from "@material-ui/core/Typography";
 import PersonalDetailsForm from "../forms/PersonalDetailsForm";
 import ContactDetailsForm from "../forms/ContactDetailsForm";
 import ExtraDetailsForm from "../forms/ExtraDetailsForm";
+import { registerUser } from "../actions";
+import { connect } from "react-redux";
 import {
   validateEmail,
   validatePassword,
@@ -148,6 +150,8 @@ const Registration = props => {
   };
 
   const handleFinish = () => {
+    console.log("in finish");
+    props.registerUser(values);
     handleClose();
   };
 
@@ -322,4 +326,4 @@ const Registration = props => {
   return matches ? renderMobileStepper() : renderStepper();
 };
 
-export default Registration;
+export default connect(null, { registerUser })(Registration);
